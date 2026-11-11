@@ -1,0 +1,18 @@
+# The answers this project was made from, which `copier update` reads. Change one with
+# `copier update --data name=value`, not here.
+_commit: v0.5.0
+_src_path: gh:theAndreas/embedded-cpp-template
+arduino_core: arduino:avr@1.8.8
+author: Andreas Burnickl
+copyright_year: 2026
+description: An Arduino library that drives an 8x8x8 LED cube of 74HC595 shift registers.
+fqbn: arduino:avr:uno
+github_owner: AndreasBur
+license: GPL-3.0-or-later
+macro_prefix: LEDCUBE
+namespace: ledcube
+project_name: LedCube
+simavr_frequency: 16000000
+simavr_mcu: atmega328p
+skeleton: false
+url: https://github.com/AndreasBur/LED-Cube

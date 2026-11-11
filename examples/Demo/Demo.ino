@@ -1,7 +1,6 @@
 ﻿#include <Arduino.h>
 #include "LedCube.h"
-#include "Transformation.h"
-#include "8x8_horizontal_LSB_1.h"
+#include "ledcube/font/8x8_horizontal_LSB_1.h"
 
 #define SER_74 13  // serial input
 #define RCK_74 12  // storage input
