@@ -1,9 +1,0 @@
-# depslib dependency file v1.0
-1486755630 source:c:\users\andreas\documents\github\led-cube\ledcube_cb\main.cpp
-	<iostream>
-	<stdio.h>
-
-1486730469 source:c:\users\virskl\documents\github\led-cube\ledcube_cb\main.cpp
-	<iostream>
-	<stdio.h>
-
