@@ -31,6 +31,7 @@ ist, schlägt `make check` fehl.
 | T-9 | Was die neuen Warnungen (`-Wconversion`, `-Wsign-conversion`, `-Wshadow`), clang-tidy und cppcheck finden: jeweils beheben oder NOLINT mit Grund | offen |
 | T-10 | `make docs`: alles, was ein Sketch nutzen kann, dokumentiert | offen |
 | T-11 | README: Hardware (Platinenvarianten 2x/3x 2891), Pinbelegung, Bauanleitung, Bilder, Tabelle Flash/RAM (`make sizes`) | offen |
+| T-12 | `make coverage` zählt bei einem Template nur die Funktionen, die ein Test instanziiert: `Transformation` und jede ungetestete Funktion von `LedCube` fehlen im Bericht, statt als Lücke zu erscheinen. Explizite Instanziierung im Test, etwa `template class LedCube<13, 11, 12>;`, damit jede Zeile zählt | offen |
 
 ### M2 – Fehler im bestehenden Code
 
@@ -41,6 +42,7 @@ Jeder zuerst als Test, der fehlschlägt (braucht T-7).
 | B-1 | `start()`: [LedCube.h:237](src/ledcube/LedCube.h#L237) `State == READY \|\| LEDCUBE_STATE_STOPPED` ist immer wahr; gemeint ist `\|\| State == LEDCUBE_STATE_STOPPED` | offen |
 | B-2 | Lesen und Schreiben auf verschiedenen Puffern: `get*()` liest `CurrentFrame`, `set*()` schreibt `NextFrame`. Nach dem Tausch enthält `NextFrame` den vorletzten Frame, inkrementelles Zeichnen verliert Änderungen. Semantik festlegen, etwa Kopieren beim Tausch oder ein explizites `beginFrame()` | offen |
 | B-3 | `Transformation::rotate()`, `mirror()`, `rotateWithShift()` deklariert, aber nicht implementiert: Linkerfehler beim Aufruf. Implementieren (G-4, G-5) oder entfernen | offen |
+| B-4 | `init()`: [LedCube.h:217](src/ledcube/LedCube.h#L217) ruft `clearCube()` auf, bevor die Pins Ausgänge sind. Auf dem AVR schaltet ein Schreiben auf einen Eingang nur den Pull-up: das Löschen der Schieberegister kommt vermutlich nicht an, nach dem Einschalten zeigen sie Zufälliges. Pins zuerst als Ausgänge, dann löschen | offen |
 
 ### M3 – Treiber
 
