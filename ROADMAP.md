@@ -26,7 +26,7 @@ ist, schlägt `make check` fehl.
 | T-4 | Dev Container baut hinter dem Firmen-Proxy nicht: der Download von arduino-cli bricht mit curl 60 ab (TLS). Site-Variante unter `.devcontainer/vector/` auf dem internen Basis-Image, wie `.devcontainer/README.md` sie beschreibt | offen |
 | T-5 | `make fmt` einmal über `src/` und `examples/`: Google-Stil, `const` rechts, Doxygen-Blöcke statt der Kopf- und Trennkommentare | offen |
 | T-6 | CodingStyle.md: die Klassen in den Namespace `ledcube` (F-9); `typedef enum` mit Präfix `LEDCUBE_` zu `enum class`; `byte`/`boolean` zu `uint8_t`/`bool`; `StandardTypes.h` (`stdReturnType`, `E_OK`) ablösen; Makros wie `B(...)` und `LEDCUBE_*`-Konstanten zu `constexpr` | offen |
-| T-7 | Host-Build: `digitalWriteFast.h` greift direkt auf AVR-Register zu und kompiliert nicht gegen `test/mock`. Die Pins hinter eine kleine Schnittstelle, damit `LedCube` auf dem Host testbar ist; erster GoogleTest in `test/` (ohne einen Test bricht CMake ab) | offen |
+| T-7 | Host-Build: `digitalWriteFast.h` greift direkt auf AVR-Register zu und kompiliert nicht gegen `test/mock`. Die Pins hinter eine kleine Schnittstelle, damit `LedCube` auf dem Host testbar ist; erster GoogleTest in `test/` (ohne einen Test bricht CMake ab). Die Pins als Template-Parameter, `LedCube<13, 11, 12>`; auf dem AVR weiter `digitalWriteFast`, auf dem Host der Core, den der Mock aufzeichnet | erledigt |
 | T-8 | `examples/SelfCheck` für simavr schreiben, dann `SIMAVR_MCU` und `SELF_CHECK_EXAMPLE` in `tools/project.sh` wieder setzen | offen |
 | T-9 | Was die neuen Warnungen (`-Wconversion`, `-Wsign-conversion`, `-Wshadow`), clang-tidy und cppcheck finden: jeweils beheben oder NOLINT mit Grund | offen |
 | T-10 | `make docs`: alles, was ein Sketch nutzen kann, dokumentiert | offen |
@@ -38,7 +38,7 @@ Jeder zuerst als Test, der fehlschlägt (braucht T-7).
 
 | Id | Punkt | Status |
 |---|---|---|
-| B-1 | `start()`: [LedCube.cpp:89](src/ledcube/LedCube.cpp#L89) `State == READY \|\| LEDCUBE_STATE_STOPPED` ist immer wahr; gemeint ist `\|\| State == LEDCUBE_STATE_STOPPED` | offen |
+| B-1 | `start()`: [LedCube.h:237](src/ledcube/LedCube.h#L237) `State == READY \|\| LEDCUBE_STATE_STOPPED` ist immer wahr; gemeint ist `\|\| State == LEDCUBE_STATE_STOPPED` | offen |
 | B-2 | Lesen und Schreiben auf verschiedenen Puffern: `get*()` liest `CurrentFrame`, `set*()` schreibt `NextFrame`. Nach dem Tausch enthält `NextFrame` den vorletzten Frame, inkrementelles Zeichnen verliert Änderungen. Semantik festlegen, etwa Kopieren beim Tausch oder ein explizites `beginFrame()` | offen |
 | B-3 | `Transformation::rotate()`, `mirror()`, `rotateWithShift()` deklariert, aber nicht implementiert: Linkerfehler beim Aufruf. Implementieren (G-4, G-5) oder entfernen | offen |
 

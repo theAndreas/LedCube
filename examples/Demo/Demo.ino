@@ -8,8 +8,8 @@
 
 void setChar(byte);
 
-LedCube Cube;
-Transformation CubeTrans(&Cube);
+LedCube<SER_74, SCK_74, RCK_74> Cube;
+Transformation<decltype(Cube)> CubeTrans(&Cube);
 int Counter;
 byte CharCounter = 0;
 

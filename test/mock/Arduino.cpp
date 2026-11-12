@@ -7,7 +7,14 @@
 
 #include <string>
 
+MockPins mock_pins;
 MockSerial Serial;
+
+void pinMode(uint8_t pin, uint8_t mode) { mock_pins.modes[pin] = mode; }
+
+void digitalWrite(uint8_t pin, uint8_t val) {
+  mock_pins.writes.push_back(PinWrite{pin, val});
+}
 
 size_t Print::print(__FlashStringHelper const* text) {
   return print(reinterpret_cast<char const*>(text));
