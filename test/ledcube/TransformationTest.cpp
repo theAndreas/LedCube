@@ -24,7 +24,7 @@ TEST(TransformationTest, RefusesACircleBeyondTheCube) {
   Transformation<Cube> transformation(&cube);
 
   EXPECT_EQ(
-      transformation.shiftCircle(Axis::kZ, RotationDirection::kClockwise, 5),
+      transformation.ShiftCircle(Axis::kZ, RotationDirection::kClockwise, 5),
       Error::kOutOfRange);
 }
 

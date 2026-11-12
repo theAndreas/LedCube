@@ -87,74 +87,74 @@ class LedCubeTest : public ::testing::Test {
 
   static void RunTasks(Cube& cube, uint8_t count) {
     for (uint8_t i{0}; i < count; ++i) {
-      cube.task();
+      cube.Update();
     }
   }
 };
 
-TEST_F(LedCubeTest, SetsItsPinsAsOutputsOnInit) {
+TEST_F(LedCubeTest, SetsItsPinsAsOutputsOnBegin) {
   Cube cube;
 
-  cube.init();
+  cube.Begin();
 
   EXPECT_EQ(mock_pins.modes[kDataPin], OUTPUT);
   EXPECT_EQ(mock_pins.modes[kClockPin], OUTPUT);
   EXPECT_EQ(mock_pins.modes[kStoragePin], OUTPUT);
 }
 
-TEST_F(LedCubeTest, StartsAfterInit) {
+TEST_F(LedCubeTest, StartsAfterBegin) {
   Cube cube;
-  cube.init();
+  cube.Begin();
 
-  EXPECT_EQ(cube.start(), Error::kNone);
+  EXPECT_EQ(cube.Start(), Error::kNone);
 }
 
-TEST_F(LedCubeTest, RefusesToStartBeforeInit) {
+TEST_F(LedCubeTest, RefusesToStartBeforeBegin) {
   Cube cube;
 
-  EXPECT_EQ(cube.start(), Error::kWrongState);
+  EXPECT_EQ(cube.Start(), Error::kWrongState);
 }
 
 TEST_F(LedCubeTest, RefusesToStartWhileRunning) {
   Cube cube;
-  cube.init();
-  ASSERT_EQ(cube.start(), Error::kNone);
+  cube.Begin();
+  ASSERT_EQ(cube.Start(), Error::kNone);
 
-  EXPECT_EQ(cube.start(), Error::kWrongState);
+  EXPECT_EQ(cube.Start(), Error::kWrongState);
 }
 
 TEST_F(LedCubeTest, StartsAgainAfterStop) {
   Cube cube;
-  cube.init();
-  ASSERT_EQ(cube.start(), Error::kNone);
-  ASSERT_EQ(cube.stop(), Error::kNone);
+  cube.Begin();
+  ASSERT_EQ(cube.Start(), Error::kNone);
+  ASSERT_EQ(cube.Stop(), Error::kNone);
 
-  EXPECT_EQ(cube.start(), Error::kNone);
+  EXPECT_EQ(cube.Start(), Error::kNone);
 }
 
 TEST_F(LedCubeTest, RefusesAVoxelBeyondTheCube) {
   Cube cube;
 
-  EXPECT_EQ(cube.setVoxel(8, 0, 0), Error::kOutOfRange);
+  EXPECT_EQ(cube.SetVoxel(8, 0, 0), Error::kOutOfRange);
 }
 
 TEST_F(LedCubeTest, ShiftsNothingBeforeStart) {
   Cube cube;
-  cube.init();
+  cube.Begin();
   ForgetWrites();
 
-  cube.task();
+  cube.Update();
 
   EXPECT_TRUE(mock_pins.writes.empty());
 }
 
 TEST_F(LedCubeTest, ShowsTheFirstLayerOnTheFirstTask) {
   Cube cube;
-  cube.init();
-  ASSERT_EQ(cube.start(), Error::kNone);
+  cube.Begin();
+  ASSERT_EQ(cube.Start(), Error::kNone);
   ForgetWrites();
 
-  cube.task();
+  cube.Update();
 
   EXPECT_EQ(Latched(), (std::vector<Bytes>{{0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
                                             0x00, 0x00, 0x00}}));
@@ -162,12 +162,12 @@ TEST_F(LedCubeTest, ShowsTheFirstLayerOnTheFirstTask) {
 
 TEST_F(LedCubeTest, ShowsTheNextLayerOnEachTask) {
   Cube cube;
-  cube.init();
-  ASSERT_EQ(cube.start(), Error::kNone);
-  cube.task();
+  cube.Begin();
+  ASSERT_EQ(cube.Start(), Error::kNone);
+  cube.Update();
   ForgetWrites();
 
-  cube.task();
+  cube.Update();
 
   EXPECT_EQ(Latched(), (std::vector<Bytes>{{0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
                                             0x00, 0x00, 0x00}}));
@@ -175,15 +175,15 @@ TEST_F(LedCubeTest, ShowsTheNextLayerOnEachTask) {
 
 TEST_F(LedCubeTest, ShowsTheNextFrameAfterTheLastLayer) {
   Cube cube;
-  cube.init();
-  ASSERT_EQ(cube.start(), Error::kNone);
-  ASSERT_EQ(cube.setVoxel(3, 1, 0), Error::kNone);
-  ASSERT_EQ(cube.setNextFrameReady(), Error::kNone);
-  ASSERT_EQ(cube.setNextFrameTimeElapsed(), Error::kNone);
+  cube.Begin();
+  ASSERT_EQ(cube.Start(), Error::kNone);
+  ASSERT_EQ(cube.SetVoxel(3, 1, 0), Error::kNone);
+  ASSERT_EQ(cube.SetNextFrameReady(), Error::kNone);
+  ASSERT_EQ(cube.SetNextFrameTimeElapsed(), Error::kNone);
   RunTasks(cube, 8);
   ForgetWrites();
 
-  cube.task();
+  cube.Update();
 
   EXPECT_EQ(Latched(), (std::vector<Bytes>{{0x01, 0x00, 0x08, 0x00, 0x00, 0x00,
                                             0x00, 0x00, 0x00}}));
@@ -191,14 +191,14 @@ TEST_F(LedCubeTest, ShowsTheNextFrameAfterTheLastLayer) {
 
 TEST_F(LedCubeTest, KeepsTheFrameWhileTheNextIsNotReady) {
   Cube cube;
-  cube.init();
-  ASSERT_EQ(cube.start(), Error::kNone);
-  ASSERT_EQ(cube.setVoxel(3, 1, 0), Error::kNone);
-  ASSERT_EQ(cube.setNextFrameTimeElapsed(), Error::kNone);
+  cube.Begin();
+  ASSERT_EQ(cube.Start(), Error::kNone);
+  ASSERT_EQ(cube.SetVoxel(3, 1, 0), Error::kNone);
+  ASSERT_EQ(cube.SetNextFrameTimeElapsed(), Error::kNone);
   RunTasks(cube, 8);
   ForgetWrites();
 
-  cube.task();
+  cube.Update();
 
   EXPECT_EQ(Latched(), (std::vector<Bytes>{{0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
                                             0x00, 0x00, 0x00}}));
@@ -206,14 +206,14 @@ TEST_F(LedCubeTest, KeepsTheFrameWhileTheNextIsNotReady) {
 
 TEST_F(LedCubeTest, KeepsTheFrameUntilItsTimeHasElapsed) {
   Cube cube;
-  cube.init();
-  ASSERT_EQ(cube.start(), Error::kNone);
-  ASSERT_EQ(cube.setVoxel(3, 1, 0), Error::kNone);
-  ASSERT_EQ(cube.setNextFrameReady(), Error::kNone);
+  cube.Begin();
+  ASSERT_EQ(cube.Start(), Error::kNone);
+  ASSERT_EQ(cube.SetVoxel(3, 1, 0), Error::kNone);
+  ASSERT_EQ(cube.SetNextFrameReady(), Error::kNone);
   RunTasks(cube, 8);
   ForgetWrites();
 
-  cube.task();
+  cube.Update();
 
   EXPECT_EQ(Latched(), (std::vector<Bytes>{{0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
                                             0x00, 0x00, 0x00}}));

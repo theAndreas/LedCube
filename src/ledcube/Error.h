@@ -22,7 +22,7 @@ namespace ledcube {
 enum class Error : uint8_t {
   kNone,       /*!< Nothing: the call did what it should. */
   kOutOfRange, /*!< A coordinate or a circle lies beyond the cube. */
-  kWrongState  /*!< The state forbids the call, as start() before init(). */
+  kWrongState  /*!< The state forbids the call, as Start() before Begin(). */
 };
 
 }  // namespace ledcube
