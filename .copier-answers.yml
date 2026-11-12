@@ -7,7 +7,7 @@ author: Andreas Burnickl
 copyright_year: 2026
 description: An Arduino library that drives an 8x8x8 LED cube of 74HC595 shift registers.
 fqbn: arduino:avr:uno
-github_owner: AndreasBur
+github_owner: theAndreas
 license: GPL-3.0-or-later
 macro_prefix: LEDCUBE
 namespace: ledcube
@@ -15,4 +15,4 @@ project_name: LedCube
 simavr_frequency: 16000000
 simavr_mcu: atmega328p
 skeleton: false
-url: https://github.com/AndreasBur/LED-Cube
+url: https://github.com/theAndreas/LedCube
