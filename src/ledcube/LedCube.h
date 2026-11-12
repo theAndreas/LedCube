@@ -23,12 +23,6 @@
 #define LEDCUBE_NUMBER_OF_SHIFT_REGISTERS 9
 #define LEDCUBE_SHIFT_REGISTER_BITWIDTH 8
 
-// #define LEDCUBE_GET_VOXEL(X, Y, Z) bitRead(CurrentFrame[Y][Z], X) #define
-// LEDCUBE_SET_VOXEL(X, Y, Z)                    bitSet(NextFrame[Y][Z], X)
-// #define LEDCUBE_CLEAR_VOXEL(X, Y, Z) bitClear(NextFrame[Y][Z], X) #define
-// LEDCUBE_WRITE_VOXEL(X, Y, Z, Value)           bitWrite(NextFrame[Y][Z], X,
-// Value)
-
 /* Type which describes the internal state of the LedCube */
 typedef enum {
   LEDCUBE_STATE_NONE,
@@ -480,7 +474,7 @@ byte LedCube<DataPin, ClockPin, StoragePin>::getVoxelsXFast(byte Y, byte Z) {
  *
  * \param[in] Y Y-axis coordinate.
  * \param[in] Z Z-axis coordinate.
- * \return voxels or with or value or on or or or off.
+ * \param[in] Value Voxels with value on or off.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsXFast(byte Y, byte Z,
@@ -514,7 +508,7 @@ byte LedCube<DataPin, ClockPin, StoragePin>::getVoxelsYFast(byte X, byte Z) {
  *
  * \param[in] X X-axis coordinate.
  * \param[in] Z Z-axis coordinate.
- * \return voxels or with or value or on or or or off.
+ * \param[in] Value Voxels with value on or off.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsYFast(byte X, byte Z,
@@ -549,7 +543,7 @@ byte LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZFast(byte X, byte Y) {
  *
  * \param[in] X X-axis coordinate.
  * \param[in] Y Y-axis coordinate.
- * \return voxels or with or value or on or or or off.
+ * \param[in] Value Voxels with value on or off.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZFast(byte X, byte Y,

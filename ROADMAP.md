@@ -39,10 +39,10 @@ Jeder zuerst als Test, der fehlschlägt (braucht T-7).
 
 | Id | Punkt | Status |
 |---|---|---|
-| B-1 | `start()`: [LedCube.h:186](src/ledcube/LedCube.h#L186) `State == READY \|\| LEDCUBE_STATE_STOPPED` ist immer wahr; gemeint ist `\|\| State == LEDCUBE_STATE_STOPPED` | offen |
+| B-1 | `start()`: [LedCube.h:180](src/ledcube/LedCube.h#L180) `State == READY \|\| LEDCUBE_STATE_STOPPED` ist immer wahr; gemeint ist `\|\| State == LEDCUBE_STATE_STOPPED` | offen |
 | B-2 | Lesen und Schreiben auf verschiedenen Puffern: `get*()` liest `CurrentFrame`, `set*()` schreibt `NextFrame`. Nach dem Tausch enthält `NextFrame` den vorletzten Frame, inkrementelles Zeichnen verliert Änderungen. Semantik festlegen, etwa Kopieren beim Tausch oder ein explizites `beginFrame()` | offen |
 | B-3 | `Transformation::rotate()`, `mirror()`, `rotateWithShift()` deklariert, aber nicht implementiert: Linkerfehler beim Aufruf. Implementieren (G-4, G-5) oder entfernen | offen |
-| B-4 | `init()`: [LedCube.h:171](src/ledcube/LedCube.h#L171) ruft `clearCube()` auf, bevor die Pins Ausgänge sind. Auf dem AVR schaltet ein Schreiben auf einen Eingang nur den Pull-up: das Löschen der Schieberegister kommt vermutlich nicht an, nach dem Einschalten zeigen sie Zufälliges. Pins zuerst als Ausgänge, dann löschen | offen |
+| B-4 | `init()`: [LedCube.h:165](src/ledcube/LedCube.h#L165) ruft `clearCube()` auf, bevor die Pins Ausgänge sind. Auf dem AVR schaltet ein Schreiben auf einen Eingang nur den Pull-up: das Löschen der Schieberegister kommt vermutlich nicht an, nach dem Einschalten zeigen sie Zufälliges. Pins zuerst als Ausgänge, dann löschen | offen |
 
 ### M3 – Treiber
 
