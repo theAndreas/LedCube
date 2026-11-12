@@ -179,7 +179,9 @@ void LedCube<DataPin, ClockPin, StoragePin>::init() {
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 stdReturnType LedCube<DataPin, ClockPin, StoragePin>::start() {
-  if (State == LEDCUBE_STATE_READY || LEDCUBE_STATE_STOPPED) {
+  bool const startable{State == LEDCUBE_STATE_READY ||
+                       State == LEDCUBE_STATE_STOPPED};
+  if (startable) {
     State = LEDCUBE_STATE_RUNNING;
     return E_OK;
   }

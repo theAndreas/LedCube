@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "Arduino.h"
+#include "ledcube/StandardTypes.h"
 
 namespace ledcube {
 
@@ -99,6 +100,36 @@ TEST_F(LedCubeTest, SetsItsPinsAsOutputsOnInit) {
   EXPECT_EQ(mock_pins.modes[kDataPin], OUTPUT);
   EXPECT_EQ(mock_pins.modes[kClockPin], OUTPUT);
   EXPECT_EQ(mock_pins.modes[kStoragePin], OUTPUT);
+}
+
+TEST_F(LedCubeTest, StartsAfterInit) {
+  Cube cube;
+  cube.init();
+
+  EXPECT_EQ(cube.start(), E_OK);
+}
+
+TEST_F(LedCubeTest, RefusesToStartBeforeInit) {
+  Cube cube;
+
+  EXPECT_EQ(cube.start(), E_NOT_OK);
+}
+
+TEST_F(LedCubeTest, RefusesToStartWhileRunning) {
+  Cube cube;
+  cube.init();
+  cube.start();
+
+  EXPECT_EQ(cube.start(), E_NOT_OK);
+}
+
+TEST_F(LedCubeTest, StartsAgainAfterStop) {
+  Cube cube;
+  cube.init();
+  cube.start();
+  cube.stop();
+
+  EXPECT_EQ(cube.start(), E_OK);
 }
 
 TEST_F(LedCubeTest, ShiftsNothingBeforeStart) {
