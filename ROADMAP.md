@@ -31,7 +31,7 @@ ist, schlägt `make check` fehl.
 | T-9 | Was die neuen Warnungen (`-Wconversion`, `-Wsign-conversion`, `-Wshadow`), clang-tidy und cppcheck finden: jeweils beheben oder NOLINT mit Grund | offen |
 | T-10 | `make docs`: alles, was ein Sketch nutzen kann, dokumentiert | offen |
 | T-11 | README: Hardware (Platinenvarianten 2x/3x 2891), Pinbelegung, Bauanleitung, Bilder, Tabelle Flash/RAM (`make sizes`) | offen |
-| T-12 | `make coverage` zählt bei einem Template nur die Funktionen, die ein Test instanziiert: `Transformation` und jede ungetestete Funktion von `LedCube` fehlen im Bericht, statt als Lücke zu erscheinen. Explizite Instanziierung im Test, etwa `template class LedCube<13, 11, 12>;`, damit jede Zeile zählt | offen |
+| T-12 | `make coverage` zählt bei einem Template nur die Funktionen, die ein Test instanziiert: `Transformation` und jede ungetestete Funktion von `LedCube` fehlen im Bericht, statt als Lücke zu erscheinen. Explizite Instanziierung im Test, etwa `template class LedCube<13, 11, 12>;`, damit jede Zeile zählt. Danach zählt `LedCube.h` 176 Zeilen statt 81 (43 % erreicht), `Transformation.h` 114 (0 %) | erledigt |
 
 ### M2 – Fehler im bestehenden Code
 
