@@ -15,19 +15,19 @@
 
 namespace ledcube {
 
-/* type which describes rotation in degrees */
-typedef enum {
-  TRANSFORMATION_ROTATION_DEGREE_0,
-  TRANSFORMATION_ROTATION_DEGREE_90,
-  TRANSFORMATION_ROTATION_DEGREE_180,
-  TRANSFORMATION_ROTATION_DEGREE_270
-} TransformationRotationDegreeType;
+/*! \brief An angle to turn the cube by. */
+enum class RotationAngle : uint8_t {
+  kDegrees0,   /*!< Not at all. */
+  kDegrees90,  /*!< A quarter turn. */
+  kDegrees180, /*!< A half turn. */
+  kDegrees270  /*!< Three quarters of a turn. */
+};
 
-/* type which describes direction of rotation */
-typedef enum {
-  TRANSFORMATION_ROTATION_CLOCKWISE,
-  TRANSFORMATION_ROTATION_COUNTERCLOCKWISE
-} TransformationRotationDirectionType;
+/*! \brief The direction to turn in, looking along the axis. */
+enum class RotationDirection : uint8_t {
+  kClockwise,       /*!< Clockwise. */
+  kCounterclockwise /*!< Counterclockwise. */
+};
 
 /*!
  * \brief Shifts and turns the voxels of a cube.
@@ -42,21 +42,18 @@ typedef enum {
 template <typename Cube>
 class Transformation {
  private:
-  // stdReturnType shiftCircle(LedCube*, LedCubeAxisType,
-  // TransformationRotationDirectionType, byte);
+  // stdReturnType shiftCircle(LedCube*, Axis,
+  // RotationDirection, byte);
   Cube* pCube;
 
  public:
   Transformation(Cube* pLedCube);
   ~Transformation();
 
-  stdReturnType shiftCircle(LedCubeAxisType,
-                            TransformationRotationDirectionType, byte);
-  void rotate(LedCubeAxisType ShiftAxis,
-              TransformationRotationDegreeType Degrees);
-  void mirror(LedCubeAxisType ShiftAxis);
-  stdReturnType rotateWithShift(LedCubeAxisType ShiftAxis,
-                                TransformationRotationDirectionType Direction,
+  stdReturnType shiftCircle(Axis, RotationDirection, byte);
+  void rotate(Axis ShiftAxis, RotationAngle Degrees);
+  void mirror(Axis ShiftAxis);
+  stdReturnType rotateWithShift(Axis ShiftAxis, RotationDirection Direction,
                                 byte Clock);
   void shiftForward(boolean = false);
   void shiftBackward(boolean = false);
@@ -187,15 +184,15 @@ void Transformation<Cube>::shiftBackwardFast(boolean Rotate) {
 }
 
 template <typename Cube>
-stdReturnType Transformation<Cube>::shiftCircle(
-    LedCubeAxisType ShiftAxis, TransformationRotationDirectionType Direction,
-    byte Circle) {
+stdReturnType Transformation<Cube>::shiftCircle(Axis ShiftAxis,
+                                                RotationDirection Direction,
+                                                byte Circle) {
   byte const LEDs = LEDCUBE_NUMBER_OF_LEDS_PER_SIDE;
 
   if (Circle > 0 && Circle <= LEDs / 2) {
     Circle--;
-    if (TRANSFORMATION_ROTATION_CLOCKWISE == Direction) {
-      if (LEDCUBE_AXIS_Z == ShiftAxis) {
+    if (RotationDirection::kClockwise == Direction) {
+      if (Axis::kZ == ShiftAxis) {
         for (byte Z = 0; Z < LEDs; Z++) {
           /* shift front, right, back, left */
           for (int8_t Y = Circle; Y < LEDs - 1 - Circle; Y++) {
@@ -219,8 +216,8 @@ stdReturnType Transformation<Cube>::shiftCircle(
         }
       }
     }
-    if (TRANSFORMATION_ROTATION_COUNTERCLOCKWISE == Direction) {
-      if (LEDCUBE_AXIS_Z == ShiftAxis) {
+    if (RotationDirection::kCounterclockwise == Direction) {
+      if (Axis::kZ == ShiftAxis) {
         for (byte Z = 0; Z < LEDs; Z++) {
           /* shift left, back, right, front */
           for (int8_t X = Circle; X < LEDs - 1 - Circle; X++) {

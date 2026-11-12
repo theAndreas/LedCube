@@ -43,14 +43,14 @@ void loop() {
     // setChar(CharCounter);
     Cube.setNextFrameReady();
     Cube.setNextFrameTimeElapsed();
-    CubeTrans.shiftCircle(ledcube::LEDCUBE_AXIS_Z,
-                          ledcube::TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 1);
-    CubeTrans.shiftCircle(ledcube::LEDCUBE_AXIS_Z,
-                          ledcube::TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 2);
-    CubeTrans.shiftCircle(ledcube::LEDCUBE_AXIS_Z,
-                          ledcube::TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 3);
-    CubeTrans.shiftCircle(ledcube::LEDCUBE_AXIS_Z,
-                          ledcube::TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 4);
+    CubeTrans.shiftCircle(ledcube::Axis::kZ,
+                          ledcube::RotationDirection::kCounterclockwise, 1);
+    CubeTrans.shiftCircle(ledcube::Axis::kZ,
+                          ledcube::RotationDirection::kCounterclockwise, 2);
+    CubeTrans.shiftCircle(ledcube::Axis::kZ,
+                          ledcube::RotationDirection::kCounterclockwise, 3);
+    CubeTrans.shiftCircle(ledcube::Axis::kZ,
+                          ledcube::RotationDirection::kCounterclockwise, 4);
     Counter = 0;
     CharCounter++;
   }

@@ -25,17 +25,21 @@
 
 namespace ledcube {
 
-/* Type which describes the internal state of the LedCube */
-typedef enum {
-  LEDCUBE_STATE_NONE,
-  LEDCUBE_STATE_INIT,
-  LEDCUBE_STATE_READY,
-  LEDCUBE_STATE_RUNNING,
-  LEDCUBE_STATE_STOPPED
-} LedCubeStateType;
+/*! \brief The state of a LedCube, which init(), start() and stop() change. */
+enum class CubeState : uint8_t {
+  kNone,    /*!< Made, init() not called yet. */
+  kInit,    /*!< In init(). */
+  kReady,   /*!< After init(): ready to start(). */
+  kRunning, /*!< After start(): task() shows the frame. */
+  kStopped  /*!< After stop(): task() shows nothing. */
+};
 
-/* Type which defines the axes */
-typedef enum { LEDCUBE_AXIS_X, LEDCUBE_AXIS_Y, LEDCUBE_AXIS_Z } LedCubeAxisType;
+/*! \brief An axis of the cube. */
+enum class Axis : uint8_t {
+  kX, /*!< Within a row, the bits of a byte of the frame. */
+  kY, /*!< Across the rows of a layer. */
+  kZ  /*!< Across the layers. */
+};
 
 /* Type which defines the buffer with all led states */
 typedef byte BufferType[LEDCUBE_NUMBER_OF_LEDS_PER_SIDE]
@@ -65,7 +69,7 @@ class LedCube {
   using StorageOutput = ledcube::internal::OutputPin<StoragePin>;
 
   byte CurrentLayer;
-  LedCubeStateType State;
+  CubeState State;
   pFrameType CurrentFrame;
   pFrameType NextFrame;
   BufferType Buffer1;
@@ -87,7 +91,7 @@ class LedCube {
 
   // get methods
   byte getCurrentLayer() { return CurrentLayer; }
-  LedCubeStateType getState() { return State; }
+  CubeState getState() { return State; }
   boolean getNextFrameReady() { return NextFrameReady; }
   boolean getNextFrameTimeElapsed() { return NextFrameTimeElapsed; }
 
@@ -145,7 +149,7 @@ class LedCube {
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 LedCube<DataPin, ClockPin, StoragePin>::LedCube() {
   CurrentLayer = 0;
-  State = LEDCUBE_STATE_NONE;
+  State = CubeState::kNone;
   NextFrameReady = false, NextFrameTimeElapsed = false;
   CurrentFrame = Buffer1;
   NextFrame = Buffer2;
@@ -163,12 +167,12 @@ LedCube<DataPin, ClockPin, StoragePin>::~LedCube() {}
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::init() {
-  State = LEDCUBE_STATE_INIT;
+  State = CubeState::kInit;
   clearCube();
   DataOutput::Begin();
   ClockOutput::Begin();
   StorageOutput::Begin();
-  State = LEDCUBE_STATE_READY;
+  State = CubeState::kReady;
 }
 
 /*!
@@ -179,10 +183,10 @@ void LedCube<DataPin, ClockPin, StoragePin>::init() {
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 stdReturnType LedCube<DataPin, ClockPin, StoragePin>::start() {
-  bool const startable{State == LEDCUBE_STATE_READY ||
-                       State == LEDCUBE_STATE_STOPPED};
+  bool const startable{State == CubeState::kReady ||
+                       State == CubeState::kStopped};
   if (startable) {
-    State = LEDCUBE_STATE_RUNNING;
+    State = CubeState::kRunning;
     return E_OK;
   }
   return E_NOT_OK;
@@ -193,8 +197,8 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::start() {
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 stdReturnType LedCube<DataPin, ClockPin, StoragePin>::stop() {
-  if (State == LEDCUBE_STATE_RUNNING) {
-    State = LEDCUBE_STATE_STOPPED;
+  if (State == CubeState::kRunning) {
+    State = CubeState::kStopped;
     return E_OK;
   }
   return E_NOT_OK;
@@ -208,7 +212,7 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::stop() {
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::task() {
-  if (State == LEDCUBE_STATE_RUNNING) {
+  if (State == CubeState::kRunning) {
     if (CurrentLayer >= LEDCUBE_NUMBER_OF_LAYERS) {
       CurrentLayer = 0;
       /* is next frame ready to show? */
@@ -564,7 +568,7 @@ void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZFast(byte X, byte Y,
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setNextFrameReady() {
-  if (State == LEDCUBE_STATE_RUNNING) {
+  if (State == CubeState::kRunning) {
     NextFrameReady = true;
     return E_OK;
   } else {
@@ -580,7 +584,7 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setNextFrameReady() {
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 stdReturnType
 LedCube<DataPin, ClockPin, StoragePin>::setNextFrameTimeElapsed() {
-  if (State == LEDCUBE_STATE_RUNNING) {
+  if (State == CubeState::kRunning) {
     NextFrameTimeElapsed = true;
     return E_OK;
   } else {
