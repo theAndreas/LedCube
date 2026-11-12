@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "Arduino.h"
-#include "ledcube/StandardTypes.h"
+#include "ledcube/Error.h"
 
 namespace ledcube {
 
@@ -106,30 +106,36 @@ TEST_F(LedCubeTest, StartsAfterInit) {
   Cube cube;
   cube.init();
 
-  EXPECT_EQ(cube.start(), E_OK);
+  EXPECT_EQ(cube.start(), Error::kNone);
 }
 
 TEST_F(LedCubeTest, RefusesToStartBeforeInit) {
   Cube cube;
 
-  EXPECT_EQ(cube.start(), E_NOT_OK);
+  EXPECT_EQ(cube.start(), Error::kWrongState);
 }
 
 TEST_F(LedCubeTest, RefusesToStartWhileRunning) {
   Cube cube;
   cube.init();
-  cube.start();
+  ASSERT_EQ(cube.start(), Error::kNone);
 
-  EXPECT_EQ(cube.start(), E_NOT_OK);
+  EXPECT_EQ(cube.start(), Error::kWrongState);
 }
 
 TEST_F(LedCubeTest, StartsAgainAfterStop) {
   Cube cube;
   cube.init();
-  cube.start();
-  cube.stop();
+  ASSERT_EQ(cube.start(), Error::kNone);
+  ASSERT_EQ(cube.stop(), Error::kNone);
 
-  EXPECT_EQ(cube.start(), E_OK);
+  EXPECT_EQ(cube.start(), Error::kNone);
+}
+
+TEST_F(LedCubeTest, RefusesAVoxelBeyondTheCube) {
+  Cube cube;
+
+  EXPECT_EQ(cube.setVoxel(8, 0, 0), Error::kOutOfRange);
 }
 
 TEST_F(LedCubeTest, ShiftsNothingBeforeStart) {
@@ -145,7 +151,7 @@ TEST_F(LedCubeTest, ShiftsNothingBeforeStart) {
 TEST_F(LedCubeTest, ShowsTheFirstLayerOnTheFirstTask) {
   Cube cube;
   cube.init();
-  cube.start();
+  ASSERT_EQ(cube.start(), Error::kNone);
   ForgetWrites();
 
   cube.task();
@@ -157,7 +163,7 @@ TEST_F(LedCubeTest, ShowsTheFirstLayerOnTheFirstTask) {
 TEST_F(LedCubeTest, ShowsTheNextLayerOnEachTask) {
   Cube cube;
   cube.init();
-  cube.start();
+  ASSERT_EQ(cube.start(), Error::kNone);
   cube.task();
   ForgetWrites();
 
@@ -170,10 +176,10 @@ TEST_F(LedCubeTest, ShowsTheNextLayerOnEachTask) {
 TEST_F(LedCubeTest, ShowsTheNextFrameAfterTheLastLayer) {
   Cube cube;
   cube.init();
-  cube.start();
-  cube.setVoxel(3, 1, 0);
-  cube.setNextFrameReady();
-  cube.setNextFrameTimeElapsed();
+  ASSERT_EQ(cube.start(), Error::kNone);
+  ASSERT_EQ(cube.setVoxel(3, 1, 0), Error::kNone);
+  ASSERT_EQ(cube.setNextFrameReady(), Error::kNone);
+  ASSERT_EQ(cube.setNextFrameTimeElapsed(), Error::kNone);
   RunTasks(cube, 8);
   ForgetWrites();
 
@@ -186,9 +192,9 @@ TEST_F(LedCubeTest, ShowsTheNextFrameAfterTheLastLayer) {
 TEST_F(LedCubeTest, KeepsTheFrameWhileTheNextIsNotReady) {
   Cube cube;
   cube.init();
-  cube.start();
-  cube.setVoxel(3, 1, 0);
-  cube.setNextFrameTimeElapsed();
+  ASSERT_EQ(cube.start(), Error::kNone);
+  ASSERT_EQ(cube.setVoxel(3, 1, 0), Error::kNone);
+  ASSERT_EQ(cube.setNextFrameTimeElapsed(), Error::kNone);
   RunTasks(cube, 8);
   ForgetWrites();
 
@@ -201,9 +207,9 @@ TEST_F(LedCubeTest, KeepsTheFrameWhileTheNextIsNotReady) {
 TEST_F(LedCubeTest, KeepsTheFrameUntilItsTimeHasElapsed) {
   Cube cube;
   cube.init();
-  cube.start();
-  cube.setVoxel(3, 1, 0);
-  cube.setNextFrameReady();
+  ASSERT_EQ(cube.start(), Error::kNone);
+  ASSERT_EQ(cube.setVoxel(3, 1, 0), Error::kNone);
+  ASSERT_EQ(cube.setNextFrameReady(), Error::kNone);
   RunTasks(cube, 8);
   ForgetWrites();
 

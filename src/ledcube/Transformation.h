@@ -13,7 +13,8 @@
 
 #include "Arduino.h"
 #include "LedCube.h"
-#include "StandardTypes.h"
+#include "ledcube/Error.h"
+#include "ledcube/attributes.h"
 
 namespace ledcube {
 
@@ -52,11 +53,12 @@ class Transformation {
   Transformation(Cube* pLedCube);
   ~Transformation();
 
-  stdReturnType shiftCircle(Axis, RotationDirection, uint8_t);
+  LEDCUBE_NODISCARD Error shiftCircle(Axis, RotationDirection, uint8_t);
   void rotate(Axis ShiftAxis, RotationAngle Degrees);
   void mirror(Axis ShiftAxis);
-  stdReturnType rotateWithShift(Axis ShiftAxis, RotationDirection Direction,
-                                uint8_t Clock);
+  LEDCUBE_NODISCARD Error rotateWithShift(Axis ShiftAxis,
+                                          RotationDirection Direction,
+                                          uint8_t Clock);
   void shiftForward(bool = false);
   void shiftBackward(bool = false);
   void shiftUpward(bool = false);
@@ -186,9 +188,9 @@ void Transformation<Cube>::shiftBackwardFast(bool Rotate) {
 }
 
 template <typename Cube>
-stdReturnType Transformation<Cube>::shiftCircle(Axis ShiftAxis,
-                                                RotationDirection Direction,
-                                                uint8_t Circle) {
+Error Transformation<Cube>::shiftCircle(Axis ShiftAxis,
+                                        RotationDirection Direction,
+                                        uint8_t Circle) {
   uint8_t const LEDs = LEDCUBE_NUMBER_OF_LEDS_PER_SIDE;
 
   if (Circle > 0 && Circle <= LEDs / 2) {
@@ -243,9 +245,9 @@ stdReturnType Transformation<Cube>::shiftCircle(Axis ShiftAxis,
         }
       }
     }
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 

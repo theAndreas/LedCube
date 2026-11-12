@@ -14,8 +14,9 @@
 #include <string.h>
 
 #include "Arduino.h"
-#include "StandardTypes.h"
+#include "ledcube/Error.h"
 #include "ledcube/OutputPin.h"
+#include "ledcube/attributes.h"
 
 /* LedCube Configuration Parameter */
 #define LEDCUBE_NUMBER_OF_LEDS_PER_SIDE 8
@@ -79,11 +80,10 @@ class LedCube {
 
   // functions
   void clearCube();
-  stdReturnType showLayer(uint8_t);
+  void showLayer(uint8_t);
   void sendData(uint8_t Data);
   void switchBufferPointer();
-  stdReturnType setLayer();
-  stdReturnType showNextFrame();
+  void showNextFrame();
 
  public:
   LedCube();
@@ -96,19 +96,19 @@ class LedCube {
   bool getNextFrameTimeElapsed() { return NextFrameTimeElapsed; }
 
   // set methods
-  stdReturnType setNextFrameReady();
-  stdReturnType setNextFrameTimeElapsed();
+  LEDCUBE_NODISCARD Error setNextFrameReady();
+  LEDCUBE_NODISCARD Error setNextFrameTimeElapsed();
 
   // methods
   void init();
-  stdReturnType start();
-  stdReturnType stop();
+  LEDCUBE_NODISCARD Error start();
+  LEDCUBE_NODISCARD Error stop();
   void task();
 
-  stdReturnType setVoxel(uint8_t, uint8_t, uint8_t);
-  stdReturnType clearVoxel(uint8_t, uint8_t, uint8_t);
-  stdReturnType writeVoxel(uint8_t, uint8_t, uint8_t, bool);
-  stdReturnType getVoxel(uint8_t, uint8_t, uint8_t, bool*);
+  LEDCUBE_NODISCARD Error setVoxel(uint8_t, uint8_t, uint8_t);
+  LEDCUBE_NODISCARD Error clearVoxel(uint8_t, uint8_t, uint8_t);
+  LEDCUBE_NODISCARD Error writeVoxel(uint8_t, uint8_t, uint8_t, bool);
+  LEDCUBE_NODISCARD Error getVoxel(uint8_t, uint8_t, uint8_t, bool*);
 
   void setVoxelFast(uint8_t X, uint8_t Y, uint8_t Z) {
     bitSet(NextFrame[Y][Z], X);
@@ -123,12 +123,12 @@ class LedCube {
     return bitRead(CurrentFrame[Y][Z], X);
   }
 
-  stdReturnType getVoxelsX(uint8_t, uint8_t, uint8_t*);
-  stdReturnType setVoxelsX(uint8_t, uint8_t, uint8_t);
-  stdReturnType getVoxelsY(uint8_t, uint8_t, uint8_t*);
-  stdReturnType setVoxelsY(uint8_t, uint8_t, uint8_t);
-  stdReturnType getVoxelsZ(uint8_t, uint8_t, uint8_t*);
-  stdReturnType setVoxelsZ(uint8_t, uint8_t, uint8_t);
+  LEDCUBE_NODISCARD Error getVoxelsX(uint8_t, uint8_t, uint8_t*);
+  LEDCUBE_NODISCARD Error setVoxelsX(uint8_t, uint8_t, uint8_t);
+  LEDCUBE_NODISCARD Error getVoxelsY(uint8_t, uint8_t, uint8_t*);
+  LEDCUBE_NODISCARD Error setVoxelsY(uint8_t, uint8_t, uint8_t);
+  LEDCUBE_NODISCARD Error getVoxelsZ(uint8_t, uint8_t, uint8_t*);
+  LEDCUBE_NODISCARD Error setVoxelsZ(uint8_t, uint8_t, uint8_t);
 
   uint8_t getVoxelsXFast(uint8_t, uint8_t);
   void setVoxelsXFast(uint8_t, uint8_t, uint8_t);
@@ -184,28 +184,32 @@ void LedCube<DataPin, ClockPin, StoragePin>::init() {
  *
  * This function starts with showing the current buffer on the led cube
  * therefore the task function has to be called periodically.
+ *
+ * \return Error::kNone, or Error::kWrongState if the state forbids the call.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::start() {
+Error LedCube<DataPin, ClockPin, StoragePin>::start() {
   bool const startable{State == CubeState::kReady ||
                        State == CubeState::kStopped};
   if (startable) {
     State = CubeState::kRunning;
-    return E_OK;
+    return Error::kNone;
   }
-  return E_NOT_OK;
+  return Error::kWrongState;
 }
 
 /*!
  * \brief Stops the led cube showing a frame.
+ *
+ * \return Error::kNone, or Error::kWrongState if the state forbids the call.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::stop() {
+Error LedCube<DataPin, ClockPin, StoragePin>::stop() {
   if (State == CubeState::kRunning) {
     State = CubeState::kStopped;
-    return E_OK;
+    return Error::kNone;
   }
-  return E_NOT_OK;
+  return Error::kWrongState;
 }
 
 /*!
@@ -256,19 +260,19 @@ void LedCube<DataPin, ClockPin, StoragePin>::clearCube() {
  * \param[in] X X-axis coordinate.
  * \param[in] Y Y-axis coordinate.
  * \param[in] Z Z-axis coordinate.
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kOutOfRange if a coordinate lies beyond the
+ *         cube.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxel(uint8_t X,
-                                                               uint8_t Y,
-                                                               uint8_t Z) {
+Error LedCube<DataPin, ClockPin, StoragePin>::setVoxel(uint8_t X, uint8_t Y,
+                                                       uint8_t Z) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     bitSet(NextFrame[Y][Z], X);
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 
@@ -278,19 +282,19 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxel(uint8_t X,
  * \param[in] X X-axis coordinate.
  * \param[in] Y Y-axis coordinate.
  * \param[in] Z Z-axis coordinate.
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kOutOfRange if a coordinate lies beyond the
+ *         cube.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::clearVoxel(uint8_t X,
-                                                                 uint8_t Y,
-                                                                 uint8_t Z) {
+Error LedCube<DataPin, ClockPin, StoragePin>::clearVoxel(uint8_t X, uint8_t Y,
+                                                         uint8_t Z) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     bitClear(NextFrame[Y][Z], X);
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 
@@ -301,20 +305,20 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::clearVoxel(uint8_t X,
  * \param[in] Y Y-axis coordinate.
  * \param[in] Z Z-axis coordinate.
  * \param[in] Value Voxel of value on or off.
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kOutOfRange if a coordinate lies beyond the
+ *         cube.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::writeVoxel(uint8_t X,
-                                                                 uint8_t Y,
-                                                                 uint8_t Z,
-                                                                 bool Value) {
+Error LedCube<DataPin, ClockPin, StoragePin>::writeVoxel(uint8_t X, uint8_t Y,
+                                                         uint8_t Z,
+                                                         bool Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     bitWrite(NextFrame[Y][Z], X, Value);
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 
@@ -325,20 +329,19 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::writeVoxel(uint8_t X,
  * \param[in] Y Y-axis coordinate.
  * \param[in] Z Z-axis coordinate.
  * \param[out] Value Voxel of value on or off.
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kOutOfRange if a coordinate lies beyond the
+ *         cube.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxel(uint8_t X,
-                                                               uint8_t Y,
-                                                               uint8_t Z,
-                                                               bool* Value) {
+Error LedCube<DataPin, ClockPin, StoragePin>::getVoxel(uint8_t X, uint8_t Y,
+                                                       uint8_t Z, bool* Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     *Value = bitRead(CurrentFrame[Y][Z], X);
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 
@@ -348,17 +351,18 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxel(uint8_t X,
  * \param[in] Y Y-axis coordinate.
  * \param[in] Z Z-axis coordinate.
  * \param[out] Value Voxels with value on or off.
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kOutOfRange if a coordinate lies beyond the
+ *         cube.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsX(
-    uint8_t Y, uint8_t Z, uint8_t* Value) {
+Error LedCube<DataPin, ClockPin, StoragePin>::getVoxelsX(uint8_t Y, uint8_t Z,
+                                                         uint8_t* Value) {
   if (Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     *Value = CurrentFrame[Y][Z];
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 
@@ -368,17 +372,18 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsX(
  * \param[in] Y Y-axis coordinate.
  * \param[in] Z Z-axis coordinate.
  * \param[in] Value Voxels with value on or off.
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kOutOfRange if a coordinate lies beyond the
+ *         cube.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsX(
-    uint8_t Y, uint8_t Z, uint8_t Value) {
+Error LedCube<DataPin, ClockPin, StoragePin>::setVoxelsX(uint8_t Y, uint8_t Z,
+                                                         uint8_t Value) {
   if (Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     NextFrame[Y][Z] = Value;
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 
@@ -388,19 +393,20 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsX(
  * \param[in] X X-axis coordinate.
  * \param[in] Z Z-axis coordinate.
  * \param[out] Value Voxels with value on or off.
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kOutOfRange if a coordinate lies beyond the
+ *         cube.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsY(
-    uint8_t X, uint8_t Z, uint8_t* Value) {
+Error LedCube<DataPin, ClockPin, StoragePin>::getVoxelsY(uint8_t X, uint8_t Z,
+                                                         uint8_t* Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
       bitWrite(*Value, Y, bitRead(CurrentFrame[Y][Z], X));
     }
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 
@@ -410,19 +416,20 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsY(
  * \param[in] X X-axis coordinate.
  * \param[in] Z Z-axis coordinate.
  * \param[in] Value Voxels with value on or off.
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kOutOfRange if a coordinate lies beyond the
+ *         cube.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsY(
-    uint8_t X, uint8_t Z, uint8_t Value) {
+Error LedCube<DataPin, ClockPin, StoragePin>::setVoxelsY(uint8_t X, uint8_t Z,
+                                                         uint8_t Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
       bitWrite(NextFrame[Y][Z], X, bitRead(Value, Y));
     }
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 
@@ -432,19 +439,20 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsY(
  * \param[in] X X-axis coordinate.
  * \param[in] Y Y-axis coordinate.
  * \param[out] Value Voxels with value on or off.
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kOutOfRange if a coordinate lies beyond the
+ *         cube.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZ(
-    uint8_t X, uint8_t Y, uint8_t* Value) {
+Error LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZ(uint8_t X, uint8_t Y,
+                                                         uint8_t* Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
       bitWrite(*Value, Z, bitRead(CurrentFrame[Y][Z], X));
     }
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 
@@ -454,19 +462,20 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZ(
  * \param[in] X X-axis coordinate.
  * \param[in] Y Y-axis coordinate.
  * \param[in] Value Voxels with value on or off.
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kOutOfRange if a coordinate lies beyond the
+ *         cube.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZ(
-    uint8_t X, uint8_t Y, uint8_t Value) {
+Error LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZ(uint8_t X, uint8_t Y,
+                                                         uint8_t Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
       bitWrite(NextFrame[Y][Z], X, bitRead(Value, Z));
     }
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kOutOfRange;
   }
 }
 
@@ -579,31 +588,30 @@ void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZFast(uint8_t X,
 /*!
  * \brief Set next frame to ready state.
  *
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kWrongState if the state forbids the call.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setNextFrameReady() {
+Error LedCube<DataPin, ClockPin, StoragePin>::setNextFrameReady() {
   if (State == CubeState::kRunning) {
     NextFrameReady = true;
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kWrongState;
   }
 }
 
 /*!
  * \brief Set next frame time elapsed.
  *
- * \return E_OK or E_NOT_OK.
+ * \return Error::kNone, or Error::kWrongState if the state forbids the call.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType
-LedCube<DataPin, ClockPin, StoragePin>::setNextFrameTimeElapsed() {
+Error LedCube<DataPin, ClockPin, StoragePin>::setNextFrameTimeElapsed() {
   if (State == CubeState::kRunning) {
     NextFrameTimeElapsed = true;
-    return E_OK;
+    return Error::kNone;
   } else {
-    return E_NOT_OK;
+    return Error::kWrongState;
   }
 }
 
@@ -633,26 +641,19 @@ void LedCube<DataPin, ClockPin, StoragePin>::sendData(uint8_t Data) {
  * This function shows a given layer on the cube.
  *
  * \param[in] Layer Layer which should be shown on the cube.
- * \return E_OK or E_NOT_OK.
+ * \pre `Layer` < LEDCUBE_NUMBER_OF_LAYERS, as task() ensures.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::showLayer(uint8_t Layer) {
-  stdReturnType ReturnValue = E_NOT_OK;
-
-  if (Layer < LEDCUBE_NUMBER_OF_LAYERS) {
-    /* put on given layer */
-    sendData(1U << Layer);
-    /* send the layer data to the shift registers */
-    for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
-      sendData(CurrentFrame[Y][Layer]);
-    }
-    // toggle storage pin
-    StorageOutput::Write(HIGH);
-    StorageOutput::Write(LOW);
-
-    ReturnValue = E_OK;
+void LedCube<DataPin, ClockPin, StoragePin>::showLayer(uint8_t Layer) {
+  /* put on given layer */
+  sendData(1U << Layer);
+  /* send the layer data to the shift registers */
+  for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+    sendData(CurrentFrame[Y][Layer]);
   }
-  return ReturnValue;
+  // toggle storage pin
+  StorageOutput::Write(HIGH);
+  StorageOutput::Write(LOW);
 }
 
 /*!
@@ -660,13 +661,10 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::showLayer(uint8_t Layer) {
  *
  * This function activates the next frame only if next frame is ready function
  * is called from timer interrupt normally.
- *
- * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::showNextFrame() {
+void LedCube<DataPin, ClockPin, StoragePin>::showNextFrame() {
   switchBufferPointer();
-  return E_OK;
 }
 
 /*!

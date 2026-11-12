@@ -3,6 +3,9 @@
 
 #include "ledcube/Transformation.h"
 
+#include <gtest/gtest.h>
+
+#include "ledcube/Error.h"
 #include "ledcube/LedCube.h"
 
 namespace ledcube {
@@ -12,4 +15,18 @@ namespace ledcube {
 // would be missing from the coverage, not shown as a gap (ROADMAP T-12).
 template class Transformation<LedCube<13, 11, 12>>;
 
+namespace {
+
+using Cube = LedCube<13, 11, 12>;
+
+TEST(TransformationTest, RefusesACircleBeyondTheCube) {
+  Cube cube;
+  Transformation<Cube> transformation(&cube);
+
+  EXPECT_EQ(
+      transformation.shiftCircle(Axis::kZ, RotationDirection::kClockwise, 5),
+      Error::kOutOfRange);
+}
+
+}  // namespace
 }  // namespace ledcube

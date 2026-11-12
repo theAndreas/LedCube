@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "LedCube.h"
+#include "ledcube/attributes.h"
 #include "ledcube/font/8x8_horizontal_LSB_1.h"
 
 #define SER_74 13  // serial input
@@ -29,12 +30,14 @@ void setup() {
     }
   }
 
-  Cube.start();
-  Cube.setNextFrameReady();
-  Cube.setNextFrameTimeElapsed();
-  Cube.setVoxelsX(1, 1, B(01111110));
-  Cube.setVoxelsX(2, 7, B(00111100));
-  Cube.setVoxelsX(3, 5, B(00011000));
+  // None of these can fail: the cube is ready after init() and running after
+  // start(), and the rows lie within it.
+  ledcube::Discard(Cube.start());
+  ledcube::Discard(Cube.setNextFrameReady());
+  ledcube::Discard(Cube.setNextFrameTimeElapsed());
+  ledcube::Discard(Cube.setVoxelsX(1, 1, B01111110));
+  ledcube::Discard(Cube.setVoxelsX(2, 7, B00111100));
+  ledcube::Discard(Cube.setVoxelsX(3, 5, B00011000));
   setChar(3);
 }
 
@@ -42,24 +45,26 @@ void loop() {
   if (Counter == 200) {
     // CubeTrans.shiftBackward(&Cube, true);
     // setChar(CharCounter);
-    Cube.setNextFrameReady();
-    Cube.setNextFrameTimeElapsed();
-    CubeTrans.shiftCircle(ledcube::Axis::kZ,
-                          ledcube::RotationDirection::kCounterclockwise, 1);
-    CubeTrans.shiftCircle(ledcube::Axis::kZ,
-                          ledcube::RotationDirection::kCounterclockwise, 2);
-    CubeTrans.shiftCircle(ledcube::Axis::kZ,
-                          ledcube::RotationDirection::kCounterclockwise, 3);
-    CubeTrans.shiftCircle(ledcube::Axis::kZ,
-                          ledcube::RotationDirection::kCounterclockwise, 4);
+    // None of these can fail: the cube runs since setup(), and the circles 1
+    // to 4 are those of an 8x8x8 cube.
+    ledcube::Discard(Cube.setNextFrameReady());
+    ledcube::Discard(Cube.setNextFrameTimeElapsed());
+    ledcube::Discard(CubeTrans.shiftCircle(
+        ledcube::Axis::kZ, ledcube::RotationDirection::kCounterclockwise, 1));
+    ledcube::Discard(CubeTrans.shiftCircle(
+        ledcube::Axis::kZ, ledcube::RotationDirection::kCounterclockwise, 2));
+    ledcube::Discard(CubeTrans.shiftCircle(
+        ledcube::Axis::kZ, ledcube::RotationDirection::kCounterclockwise, 3));
+    ledcube::Discard(CubeTrans.shiftCircle(
+        ledcube::Axis::kZ, ledcube::RotationDirection::kCounterclockwise, 4));
     Counter = 0;
     CharCounter++;
   }
   Counter++;
   delay(1);
-  digitalWrite(7, STD_ON);
+  digitalWrite(7, HIGH);
   Cube.task();
-  digitalWrite(7, STD_OFF);
+  digitalWrite(7, LOW);
 }
 
 void setChar(uint8_t Number) {

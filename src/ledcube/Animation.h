@@ -9,8 +9,6 @@
 #ifndef _ANIMATION_H_
 #define _ANIMATION_H_
 
-#include "StandardTypes.h"
-
 namespace ledcube {
 
 class Animation {
