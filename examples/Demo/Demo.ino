@@ -22,9 +22,9 @@ uint8_t CharCounter = 0;
 void setup() {
   Cube.init();
   pinMode(7, OUTPUT);
-  for (uint8_t x = 0; x < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; x++) {
-    for (uint8_t y = 0; y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; y++) {
-      for (uint8_t z = 0; z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; z++) {
+  for (uint8_t x = 0; x < ledcube::kLedsPerSide; x++) {
+    for (uint8_t y = 0; y < ledcube::kLedsPerSide; y++) {
+      for (uint8_t z = 0; z < ledcube::kLedsPerSide; z++) {
         // Cube.setVoxel(x, y, z);
       }
     }

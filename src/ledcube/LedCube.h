@@ -18,13 +18,16 @@
 #include "ledcube/OutputPin.h"
 #include "ledcube/attributes.h"
 
-/* LedCube Configuration Parameter */
-#define LEDCUBE_NUMBER_OF_LEDS_PER_SIDE 8
-#define LEDCUBE_NUMBER_OF_LAYERS LEDCUBE_NUMBER_OF_LEDS_PER_SIDE
-#define LEDCUBE_NUMBER_OF_SHIFT_REGISTERS 9
-#define LEDCUBE_SHIFT_REGISTER_BITWIDTH 8
-
 namespace ledcube {
+
+/*! \brief The LEDs along each edge of the cube. */
+constexpr uint8_t kLedsPerSide{8};
+/*! \brief The layers of the cube, one above the other. */
+constexpr uint8_t kLayers{kLedsPerSide};
+/*! \brief The 74HC595 in the chain: one for the layers, one per row. */
+constexpr uint8_t kShiftRegisters{9};
+/*! \brief The outputs of a 74HC595. */
+constexpr uint8_t kShiftRegisterWidth{8};
 
 /*! \brief The state of a LedCube, which init(), start() and stop() change. */
 enum class CubeState : uint8_t {
@@ -43,10 +46,9 @@ enum class Axis : uint8_t {
 };
 
 /* Type which defines the buffer with all led states */
-using BufferType =
-    uint8_t[LEDCUBE_NUMBER_OF_LEDS_PER_SIDE][LEDCUBE_NUMBER_OF_LEDS_PER_SIDE];
+using BufferType = uint8_t[kLedsPerSide][kLedsPerSide];
 /* Type which points to the buffer for the next or current frame */
-using pFrameType = uint8_t (*)[LEDCUBE_NUMBER_OF_LEDS_PER_SIDE];
+using pFrameType = uint8_t (*)[kLedsPerSide];
 
 /*!
  * \brief Drives an 8x8x8 LED cube through a chain of 74HC595 shift registers.
@@ -221,7 +223,7 @@ Error LedCube<DataPin, ClockPin, StoragePin>::stop() {
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::task() {
   if (State == CubeState::kRunning) {
-    if (CurrentLayer >= LEDCUBE_NUMBER_OF_LAYERS) {
+    if (CurrentLayer >= kLayers) {
       CurrentLayer = 0;
       /* is next frame ready to show? */
       if (NextFrameReady && NextFrameTimeElapsed) {
@@ -244,9 +246,7 @@ template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::clearCube() {
   DataOutput::Write(LOW);
 
-  for (uint8_t i = 0; i < (LEDCUBE_NUMBER_OF_SHIFT_REGISTERS *
-                           LEDCUBE_SHIFT_REGISTER_BITWIDTH);
-       i++) {
+  for (uint8_t i = 0; i < (kShiftRegisters * kShiftRegisterWidth); i++) {
     ClockOutput::Write(HIGH);
     ClockOutput::Write(LOW);
   }
@@ -266,9 +266,7 @@ void LedCube<DataPin, ClockPin, StoragePin>::clearCube() {
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 Error LedCube<DataPin, ClockPin, StoragePin>::setVoxel(uint8_t X, uint8_t Y,
                                                        uint8_t Z) {
-  if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
+  if (X < kLedsPerSide && Y < kLedsPerSide && Z < kLedsPerSide) {
     bitSet(NextFrame[Y][Z], X);
     return Error::kNone;
   } else {
@@ -288,9 +286,7 @@ Error LedCube<DataPin, ClockPin, StoragePin>::setVoxel(uint8_t X, uint8_t Y,
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 Error LedCube<DataPin, ClockPin, StoragePin>::clearVoxel(uint8_t X, uint8_t Y,
                                                          uint8_t Z) {
-  if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
+  if (X < kLedsPerSide && Y < kLedsPerSide && Z < kLedsPerSide) {
     bitClear(NextFrame[Y][Z], X);
     return Error::kNone;
   } else {
@@ -312,9 +308,7 @@ template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 Error LedCube<DataPin, ClockPin, StoragePin>::writeVoxel(uint8_t X, uint8_t Y,
                                                          uint8_t Z,
                                                          bool Value) {
-  if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
+  if (X < kLedsPerSide && Y < kLedsPerSide && Z < kLedsPerSide) {
     bitWrite(NextFrame[Y][Z], X, Value);
     return Error::kNone;
   } else {
@@ -335,9 +329,7 @@ Error LedCube<DataPin, ClockPin, StoragePin>::writeVoxel(uint8_t X, uint8_t Y,
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 Error LedCube<DataPin, ClockPin, StoragePin>::getVoxel(uint8_t X, uint8_t Y,
                                                        uint8_t Z, bool* Value) {
-  if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
+  if (X < kLedsPerSide && Y < kLedsPerSide && Z < kLedsPerSide) {
     *Value = bitRead(CurrentFrame[Y][Z], X);
     return Error::kNone;
   } else {
@@ -357,8 +349,7 @@ Error LedCube<DataPin, ClockPin, StoragePin>::getVoxel(uint8_t X, uint8_t Y,
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 Error LedCube<DataPin, ClockPin, StoragePin>::getVoxelsX(uint8_t Y, uint8_t Z,
                                                          uint8_t* Value) {
-  if (Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
+  if (Y < kLedsPerSide && Z < kLedsPerSide) {
     *Value = CurrentFrame[Y][Z];
     return Error::kNone;
   } else {
@@ -378,8 +369,7 @@ Error LedCube<DataPin, ClockPin, StoragePin>::getVoxelsX(uint8_t Y, uint8_t Z,
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 Error LedCube<DataPin, ClockPin, StoragePin>::setVoxelsX(uint8_t Y, uint8_t Z,
                                                          uint8_t Value) {
-  if (Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
+  if (Y < kLedsPerSide && Z < kLedsPerSide) {
     NextFrame[Y][Z] = Value;
     return Error::kNone;
   } else {
@@ -399,9 +389,8 @@ Error LedCube<DataPin, ClockPin, StoragePin>::setVoxelsX(uint8_t Y, uint8_t Z,
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 Error LedCube<DataPin, ClockPin, StoragePin>::getVoxelsY(uint8_t X, uint8_t Z,
                                                          uint8_t* Value) {
-  if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
-    for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+  if (X < kLedsPerSide && Z < kLedsPerSide) {
+    for (uint8_t Y = 0; Y < kLedsPerSide; Y++) {
       bitWrite(*Value, Y, bitRead(CurrentFrame[Y][Z], X));
     }
     return Error::kNone;
@@ -422,9 +411,8 @@ Error LedCube<DataPin, ClockPin, StoragePin>::getVoxelsY(uint8_t X, uint8_t Z,
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 Error LedCube<DataPin, ClockPin, StoragePin>::setVoxelsY(uint8_t X, uint8_t Z,
                                                          uint8_t Value) {
-  if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
-    for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+  if (X < kLedsPerSide && Z < kLedsPerSide) {
+    for (uint8_t Y = 0; Y < kLedsPerSide; Y++) {
       bitWrite(NextFrame[Y][Z], X, bitRead(Value, Y));
     }
     return Error::kNone;
@@ -445,9 +433,8 @@ Error LedCube<DataPin, ClockPin, StoragePin>::setVoxelsY(uint8_t X, uint8_t Z,
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 Error LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZ(uint8_t X, uint8_t Y,
                                                          uint8_t* Value) {
-  if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
-    for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+  if (X < kLedsPerSide && Y < kLedsPerSide) {
+    for (uint8_t Z = 0; Z < kLedsPerSide; Z++) {
       bitWrite(*Value, Z, bitRead(CurrentFrame[Y][Z], X));
     }
     return Error::kNone;
@@ -468,9 +455,8 @@ Error LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZ(uint8_t X, uint8_t Y,
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 Error LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZ(uint8_t X, uint8_t Y,
                                                          uint8_t Value) {
-  if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
-      Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
-    for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+  if (X < kLedsPerSide && Y < kLedsPerSide) {
+    for (uint8_t Z = 0; Z < kLedsPerSide; Z++) {
       bitWrite(NextFrame[Y][Z], X, bitRead(Value, Z));
     }
     return Error::kNone;
@@ -524,7 +510,7 @@ uint8_t LedCube<DataPin, ClockPin, StoragePin>::getVoxelsYFast(uint8_t X,
                                                                uint8_t Z) {
   uint8_t Value = 0;
 
-  for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+  for (uint8_t Y = 0; Y < kLedsPerSide; Y++) {
     bitWrite(Value, Y, bitRead(CurrentFrame[Y][Z], X));
   }
   return Value;
@@ -543,7 +529,7 @@ template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsYFast(uint8_t X,
                                                             uint8_t Z,
                                                             uint8_t Value) {
-  for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+  for (uint8_t Y = 0; Y < kLedsPerSide; Y++) {
     bitWrite(NextFrame[Y][Z], X, bitRead(Value, Y));
   }
 }
@@ -561,7 +547,7 @@ uint8_t LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZFast(uint8_t X,
                                                                uint8_t Y) {
   uint8_t Value = 0;
 
-  for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+  for (uint8_t Z = 0; Z < kLedsPerSide; Z++) {
     bitWrite(Value, Z, bitRead(CurrentFrame[Y][Z], X));
   }
   return Value;
@@ -580,7 +566,7 @@ template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZFast(uint8_t X,
                                                             uint8_t Y,
                                                             uint8_t Value) {
-  for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+  for (uint8_t Z = 0; Z < kLedsPerSide; Z++) {
     bitWrite(NextFrame[Y][Z], X, bitRead(Value, Z));
   }
 }
@@ -641,14 +627,14 @@ void LedCube<DataPin, ClockPin, StoragePin>::sendData(uint8_t Data) {
  * This function shows a given layer on the cube.
  *
  * \param[in] Layer Layer which should be shown on the cube.
- * \pre `Layer` < LEDCUBE_NUMBER_OF_LAYERS, as task() ensures.
+ * \pre `Layer` < kLayers, as task() ensures.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::showLayer(uint8_t Layer) {
   /* put on given layer */
   sendData(1U << Layer);
   /* send the layer data to the shift registers */
-  for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+  for (uint8_t Y = 0; Y < kLedsPerSide; Y++) {
     sendData(CurrentFrame[Y][Layer]);
   }
   // toggle storage pin
