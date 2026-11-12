@@ -5,6 +5,10 @@
 
 #include "Animation.h"
 
+namespace ledcube {
+
 Animation::Animation() {}
 
 Animation::~Animation() {}
+
+}  // namespace ledcube

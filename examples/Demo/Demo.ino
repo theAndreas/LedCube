@@ -12,8 +12,8 @@
 
 void setChar(byte);
 
-LedCube<SER_74, SCK_74, RCK_74> Cube;
-Transformation<decltype(Cube)> CubeTrans(&Cube);
+ledcube::LedCube<SER_74, SCK_74, RCK_74> Cube;
+ledcube::Transformation<decltype(Cube)> CubeTrans(&Cube);
 int Counter;
 byte CharCounter = 0;
 
@@ -43,14 +43,14 @@ void loop() {
     // setChar(CharCounter);
     Cube.setNextFrameReady();
     Cube.setNextFrameTimeElapsed();
-    CubeTrans.shiftCircle(LEDCUBE_AXIS_Z,
-                          TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 1);
-    CubeTrans.shiftCircle(LEDCUBE_AXIS_Z,
-                          TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 2);
-    CubeTrans.shiftCircle(LEDCUBE_AXIS_Z,
-                          TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 3);
-    CubeTrans.shiftCircle(LEDCUBE_AXIS_Z,
-                          TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 4);
+    CubeTrans.shiftCircle(ledcube::LEDCUBE_AXIS_Z,
+                          ledcube::TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 1);
+    CubeTrans.shiftCircle(ledcube::LEDCUBE_AXIS_Z,
+                          ledcube::TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 2);
+    CubeTrans.shiftCircle(ledcube::LEDCUBE_AXIS_Z,
+                          ledcube::TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 3);
+    CubeTrans.shiftCircle(ledcube::LEDCUBE_AXIS_Z,
+                          ledcube::TRANSFORMATION_ROTATION_COUNTERCLOCKWISE, 4);
     Counter = 0;
     CharCounter++;
   }

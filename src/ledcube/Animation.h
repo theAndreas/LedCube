@@ -11,11 +11,15 @@
 
 #include "StandardTypes.h"
 
+namespace ledcube {
+
 class Animation {
  private:
  public:
   Animation();
   ~Animation();
 };
+
+}  // namespace ledcube
 
 #endif

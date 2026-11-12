@@ -12,13 +12,13 @@
 
 #include "Arduino.h"
 
+namespace ledcube {
+
 // Every member, not only those a test calls: gcov counts a member of a
 // template only where it is instantiated, so one no test calls would be
-// missing from the coverage, not shown as a gap (ROADMAP T-12). At global
-// scope, where LedCube is.
+// missing from the coverage, not shown as a gap (ROADMAP T-12).
 template class LedCube<13, 11, 12>;
 
-namespace ledcube {
 namespace {
 
 constexpr uint8_t kDataPin{13};

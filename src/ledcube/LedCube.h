@@ -23,6 +23,8 @@
 #define LEDCUBE_NUMBER_OF_SHIFT_REGISTERS 9
 #define LEDCUBE_SHIFT_REGISTER_BITWIDTH 8
 
+namespace ledcube {
+
 /* Type which describes the internal state of the LedCube */
 typedef enum {
   LEDCUBE_STATE_NONE,
@@ -48,7 +50,7 @@ typedef byte (*pFrameType)[LEDCUBE_NUMBER_OF_LEDS_PER_SIDE];
  * a write to the port register, not a call of the core's `digitalWrite()`.
  *
  * \code{.cpp}
- * LedCube<13, 11, 12> cube;  // data, clock, storage
+ * ledcube::LedCube<13, 11, 12> cube;  // data, clock, storage
  * \endcode
  *
  * \tparam DataPin The pin at the serial input (SER) of the first 74HC595.
@@ -659,5 +661,7 @@ void LedCube<DataPin, ClockPin, StoragePin>::switchBufferPointer() {
   CurrentFrame = NextFrame;
   NextFrame = pTmp;
 }
+
+}  // namespace ledcube
 
 #endif

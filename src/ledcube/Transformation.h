@@ -13,6 +13,8 @@
 #include "LedCube.h"
 #include "StandardTypes.h"
 
+namespace ledcube {
+
 /* type which describes rotation in degrees */
 typedef enum {
   TRANSFORMATION_ROTATION_DEGREE_0,
@@ -31,8 +33,8 @@ typedef enum {
  * \brief Shifts and turns the voxels of a cube.
  *
  * \code{.cpp}
- * LedCube<13, 11, 12> cube;
- * Transformation<decltype(cube)> transformation(&cube);
+ * ledcube::LedCube<13, 11, 12> cube;
+ * ledcube::Transformation<decltype(cube)> transformation(&cube);
  * \endcode
  *
  * \tparam Cube The type of the cube, a `LedCube`.
@@ -247,5 +249,7 @@ stdReturnType Transformation<Cube>::shiftCircle(
     return E_NOT_OK;
   }
 }
+
+}  // namespace ledcube
 
 #endif
