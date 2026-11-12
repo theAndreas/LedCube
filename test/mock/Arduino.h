@@ -20,10 +20,8 @@
 #include <string>
 #include <vector>
 
-// The core's types and macros, by its names and as it defines them: the
-// library is compiled against them as against the core.
-using boolean = bool;
-using byte = uint8_t;
+// The core's macros, by its names and as it defines them: the library is
+// compiled against them as against the core.
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage,modernize-macro-to-enum)
 #define HIGH 0x1

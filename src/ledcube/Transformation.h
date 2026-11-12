@@ -9,6 +9,8 @@
 #ifndef _TRANSFORMATION_H_
 #define _TRANSFORMATION_H_
 
+#include <stdint.h>
+
 #include "Arduino.h"
 #include "LedCube.h"
 #include "StandardTypes.h"
@@ -43,27 +45,27 @@ template <typename Cube>
 class Transformation {
  private:
   // stdReturnType shiftCircle(LedCube*, Axis,
-  // RotationDirection, byte);
+  // RotationDirection, uint8_t);
   Cube* pCube;
 
  public:
   Transformation(Cube* pLedCube);
   ~Transformation();
 
-  stdReturnType shiftCircle(Axis, RotationDirection, byte);
+  stdReturnType shiftCircle(Axis, RotationDirection, uint8_t);
   void rotate(Axis ShiftAxis, RotationAngle Degrees);
   void mirror(Axis ShiftAxis);
   stdReturnType rotateWithShift(Axis ShiftAxis, RotationDirection Direction,
-                                byte Clock);
-  void shiftForward(boolean = false);
-  void shiftBackward(boolean = false);
-  void shiftUpward(boolean = false);
-  void shiftDownward(boolean = false);
-  void shiftLeft(boolean = false);
-  void shiftRight(boolean = false);
+                                uint8_t Clock);
+  void shiftForward(bool = false);
+  void shiftBackward(bool = false);
+  void shiftUpward(bool = false);
+  void shiftDownward(bool = false);
+  void shiftLeft(bool = false);
+  void shiftRight(bool = false);
 
-  void shiftForwardFast(boolean = false);
-  void shiftBackwardFast(boolean = false);
+  void shiftForwardFast(bool = false);
+  void shiftBackwardFast(bool = false);
 };
 
 template <typename Cube>
@@ -75,9 +77,9 @@ template <typename Cube>
 Transformation<Cube>::~Transformation() {}
 
 template <typename Cube>
-void Transformation<Cube>::shiftForward(boolean Rotate) {
-  for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
-    for (byte X = 0; X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE - 1; X++) {
+void Transformation<Cube>::shiftForward(bool Rotate) {
+  for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+    for (uint8_t X = 0; X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE - 1; X++) {
       pCube->setVoxelsYFast(X, Z, pCube->getVoxelsYFast(X + 1, Z));
     }
     if (Rotate)
@@ -89,9 +91,9 @@ void Transformation<Cube>::shiftForward(boolean Rotate) {
 }
 
 template <typename Cube>
-void Transformation<Cube>::shiftBackward(boolean Rotate) {
-  for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
-    for (byte X = 1; X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; X++) {
+void Transformation<Cube>::shiftBackward(bool Rotate) {
+  for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+    for (uint8_t X = 1; X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; X++) {
       pCube->setVoxelsYFast(X, Z, pCube->getVoxelsYFast(X - 1, Z));
     }
     if (Rotate)
@@ -103,9 +105,9 @@ void Transformation<Cube>::shiftBackward(boolean Rotate) {
 }
 
 template <typename Cube>
-void Transformation<Cube>::shiftUpward(boolean Rotate) {
-  for (byte Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
-    for (byte Z = 1; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+void Transformation<Cube>::shiftUpward(bool Rotate) {
+  for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+    for (uint8_t Z = 1; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
       pCube->setVoxelsXFast(Y, Z, pCube->getVoxelsXFast(Y, Z - 1));
     }
     if (Rotate)
@@ -117,9 +119,9 @@ void Transformation<Cube>::shiftUpward(boolean Rotate) {
 }
 
 template <typename Cube>
-void Transformation<Cube>::shiftDownward(boolean Rotate) {
-  for (byte Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE - 1; Y++) {
-    for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+void Transformation<Cube>::shiftDownward(bool Rotate) {
+  for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE - 1; Y++) {
+    for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
       pCube->setVoxelsXFast(Y, Z, pCube->getVoxelsXFast(Y, Z + 1));
     }
     if (Rotate)
@@ -131,9 +133,9 @@ void Transformation<Cube>::shiftDownward(boolean Rotate) {
 }
 
 template <typename Cube>
-void Transformation<Cube>::shiftLeft(boolean Rotate) {
-  for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
-    for (byte Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE - 1; Y++) {
+void Transformation<Cube>::shiftLeft(bool Rotate) {
+  for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+    for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE - 1; Y++) {
       pCube->setVoxelsXFast(Y, Z, pCube->getVoxelsXFast(Y + 1, Z));
     }
     if (Rotate)
@@ -145,9 +147,9 @@ void Transformation<Cube>::shiftLeft(boolean Rotate) {
 }
 
 template <typename Cube>
-void Transformation<Cube>::shiftRight(boolean Rotate) {
-  for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
-    for (byte Y = 1; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+void Transformation<Cube>::shiftRight(bool Rotate) {
+  for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+    for (uint8_t Y = 1; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
       pCube->setVoxelsXFast(Y, Z, pCube->getVoxelsXFast(Y - 1, Z));
     }
     if (Rotate)
@@ -159,9 +161,9 @@ void Transformation<Cube>::shiftRight(boolean Rotate) {
 }
 
 template <typename Cube>
-void Transformation<Cube>::shiftForwardFast(boolean Rotate) {
-  for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
-    for (byte Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+void Transformation<Cube>::shiftForwardFast(bool Rotate) {
+  for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+    for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
       pCube->setVoxelsXFast(Y, Z, pCube->getVoxelsXFast(Y, Z) >> 1);
       if (Rotate)
         pCube->writeVoxelFast(LEDCUBE_NUMBER_OF_LEDS_PER_SIDE - 1, Y, Z,
@@ -171,9 +173,9 @@ void Transformation<Cube>::shiftForwardFast(boolean Rotate) {
 }
 
 template <typename Cube>
-void Transformation<Cube>::shiftBackwardFast(boolean Rotate) {
-  for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
-    for (byte Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+void Transformation<Cube>::shiftBackwardFast(bool Rotate) {
+  for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+    for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
       pCube->setVoxelsXFast(Y, Z, pCube->getVoxelsXFast(Y, Z) << 1);
       if (Rotate)
         pCube->writeVoxelFast(
@@ -186,14 +188,14 @@ void Transformation<Cube>::shiftBackwardFast(boolean Rotate) {
 template <typename Cube>
 stdReturnType Transformation<Cube>::shiftCircle(Axis ShiftAxis,
                                                 RotationDirection Direction,
-                                                byte Circle) {
-  byte const LEDs = LEDCUBE_NUMBER_OF_LEDS_PER_SIDE;
+                                                uint8_t Circle) {
+  uint8_t const LEDs = LEDCUBE_NUMBER_OF_LEDS_PER_SIDE;
 
   if (Circle > 0 && Circle <= LEDs / 2) {
     Circle--;
     if (RotationDirection::kClockwise == Direction) {
       if (Axis::kZ == ShiftAxis) {
-        for (byte Z = 0; Z < LEDs; Z++) {
+        for (uint8_t Z = 0; Z < LEDs; Z++) {
           /* shift front, right, back, left */
           for (int8_t Y = Circle; Y < LEDs - 1 - Circle; Y++) {
             pCube->writeVoxelFast(Circle, Y, Z,
@@ -218,7 +220,7 @@ stdReturnType Transformation<Cube>::shiftCircle(Axis ShiftAxis,
     }
     if (RotationDirection::kCounterclockwise == Direction) {
       if (Axis::kZ == ShiftAxis) {
-        for (byte Z = 0; Z < LEDs; Z++) {
+        for (uint8_t Z = 0; Z < LEDs; Z++) {
           /* shift left, back, right, front */
           for (int8_t X = Circle; X < LEDs - 1 - Circle; X++) {
             pCube->writeVoxelFast(X, Circle, Z,

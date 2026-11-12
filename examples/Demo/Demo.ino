@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <Arduino.h>
+#include <stdint.h>
 
 #include "LedCube.h"
 #include "ledcube/font/8x8_horizontal_LSB_1.h"
@@ -10,19 +11,19 @@
 #define RCK_74 12  // storage input
 #define SCK_74 11  // clock input
 
-void setChar(byte);
+void setChar(uint8_t);
 
 ledcube::LedCube<SER_74, SCK_74, RCK_74> Cube;
 ledcube::Transformation<decltype(Cube)> CubeTrans(&Cube);
 int Counter;
-byte CharCounter = 0;
+uint8_t CharCounter = 0;
 
 void setup() {
   Cube.init();
   pinMode(7, OUTPUT);
-  for (byte x = 0; x < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; x++) {
-    for (byte y = 0; y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; y++) {
-      for (byte z = 0; z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; z++) {
+  for (uint8_t x = 0; x < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; x++) {
+    for (uint8_t y = 0; y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; y++) {
+      for (uint8_t z = 0; z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; z++) {
         // Cube.setVoxel(x, y, z);
       }
     }
@@ -61,8 +62,8 @@ void loop() {
   digitalWrite(7, STD_OFF);
 }
 
-void setChar(byte Number) {
-  for (byte i = 0; i < 8; i++) {
+void setChar(uint8_t Number) {
+  for (uint8_t i = 0; i < 8; i++) {
     Cube.setVoxelsYFast(0, 7 - i, pgm_read_byte_near(&font[Number][i]));
   }
 }

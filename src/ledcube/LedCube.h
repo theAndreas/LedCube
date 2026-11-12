@@ -42,10 +42,10 @@ enum class Axis : uint8_t {
 };
 
 /* Type which defines the buffer with all led states */
-typedef byte BufferType[LEDCUBE_NUMBER_OF_LEDS_PER_SIDE]
-                       [LEDCUBE_NUMBER_OF_LEDS_PER_SIDE];
+using BufferType =
+    uint8_t[LEDCUBE_NUMBER_OF_LEDS_PER_SIDE][LEDCUBE_NUMBER_OF_LEDS_PER_SIDE];
 /* Type which points to the buffer for the next or current frame */
-typedef byte (*pFrameType)[LEDCUBE_NUMBER_OF_LEDS_PER_SIDE];
+using pFrameType = uint8_t (*)[LEDCUBE_NUMBER_OF_LEDS_PER_SIDE];
 
 /*!
  * \brief Drives an 8x8x8 LED cube through a chain of 74HC595 shift registers.
@@ -68,19 +68,19 @@ class LedCube {
   using ClockOutput = ledcube::internal::OutputPin<ClockPin>;
   using StorageOutput = ledcube::internal::OutputPin<StoragePin>;
 
-  byte CurrentLayer;
+  uint8_t CurrentLayer;
   CubeState State;
   pFrameType CurrentFrame;
   pFrameType NextFrame;
   BufferType Buffer1;
   BufferType Buffer2;
-  boolean NextFrameReady;
-  boolean NextFrameTimeElapsed;
+  bool NextFrameReady;
+  bool NextFrameTimeElapsed;
 
   // functions
   void clearCube();
-  stdReturnType showLayer(byte);
-  void sendData(byte Data);
+  stdReturnType showLayer(uint8_t);
+  void sendData(uint8_t Data);
   void switchBufferPointer();
   stdReturnType setLayer();
   stdReturnType showNextFrame();
@@ -90,10 +90,10 @@ class LedCube {
   ~LedCube();
 
   // get methods
-  byte getCurrentLayer() { return CurrentLayer; }
+  uint8_t getCurrentLayer() { return CurrentLayer; }
   CubeState getState() { return State; }
-  boolean getNextFrameReady() { return NextFrameReady; }
-  boolean getNextFrameTimeElapsed() { return NextFrameTimeElapsed; }
+  bool getNextFrameReady() { return NextFrameReady; }
+  bool getNextFrameTimeElapsed() { return NextFrameTimeElapsed; }
 
   // set methods
   stdReturnType setNextFrameReady();
@@ -105,33 +105,37 @@ class LedCube {
   stdReturnType stop();
   void task();
 
-  stdReturnType setVoxel(byte, byte, byte);
-  stdReturnType clearVoxel(byte, byte, byte);
-  stdReturnType writeVoxel(byte, byte, byte, boolean);
-  stdReturnType getVoxel(byte, byte, byte, boolean*);
+  stdReturnType setVoxel(uint8_t, uint8_t, uint8_t);
+  stdReturnType clearVoxel(uint8_t, uint8_t, uint8_t);
+  stdReturnType writeVoxel(uint8_t, uint8_t, uint8_t, bool);
+  stdReturnType getVoxel(uint8_t, uint8_t, uint8_t, bool*);
 
-  void setVoxelFast(byte X, byte Y, byte Z) { bitSet(NextFrame[Y][Z], X); }
-  void clearVoxelFast(byte X, byte Y, byte Z) { bitClear(NextFrame[Y][Z], X); }
-  void writeVoxelFast(byte X, byte Y, byte Z, boolean Value) {
+  void setVoxelFast(uint8_t X, uint8_t Y, uint8_t Z) {
+    bitSet(NextFrame[Y][Z], X);
+  }
+  void clearVoxelFast(uint8_t X, uint8_t Y, uint8_t Z) {
+    bitClear(NextFrame[Y][Z], X);
+  }
+  void writeVoxelFast(uint8_t X, uint8_t Y, uint8_t Z, bool Value) {
     bitWrite(NextFrame[Y][Z], X, Value);
   }
-  byte getVoxelFast(byte X, byte Y, byte Z) {
+  uint8_t getVoxelFast(uint8_t X, uint8_t Y, uint8_t Z) {
     return bitRead(CurrentFrame[Y][Z], X);
   }
 
-  stdReturnType getVoxelsX(byte, byte, byte*);
-  stdReturnType setVoxelsX(byte, byte, byte);
-  stdReturnType getVoxelsY(byte, byte, byte*);
-  stdReturnType setVoxelsY(byte, byte, byte);
-  stdReturnType getVoxelsZ(byte, byte, byte*);
-  stdReturnType setVoxelsZ(byte, byte, byte);
+  stdReturnType getVoxelsX(uint8_t, uint8_t, uint8_t*);
+  stdReturnType setVoxelsX(uint8_t, uint8_t, uint8_t);
+  stdReturnType getVoxelsY(uint8_t, uint8_t, uint8_t*);
+  stdReturnType setVoxelsY(uint8_t, uint8_t, uint8_t);
+  stdReturnType getVoxelsZ(uint8_t, uint8_t, uint8_t*);
+  stdReturnType setVoxelsZ(uint8_t, uint8_t, uint8_t);
 
-  byte getVoxelsXFast(byte, byte);
-  void setVoxelsXFast(byte, byte, byte);
-  byte getVoxelsYFast(byte, byte);
-  void setVoxelsYFast(byte, byte, byte);
-  byte getVoxelsZFast(byte, byte);
-  void setVoxelsZFast(byte, byte, byte);
+  uint8_t getVoxelsXFast(uint8_t, uint8_t);
+  void setVoxelsXFast(uint8_t, uint8_t, uint8_t);
+  uint8_t getVoxelsYFast(uint8_t, uint8_t);
+  void setVoxelsYFast(uint8_t, uint8_t, uint8_t);
+  uint8_t getVoxelsZFast(uint8_t, uint8_t);
+  void setVoxelsZFast(uint8_t, uint8_t, uint8_t);
 
   void clearVoxels() { memset(NextFrame, 0, sizeof(BufferType)); }
   void setVoxels() { memset(NextFrame, 255, sizeof(BufferType)); }
@@ -236,8 +240,8 @@ template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
 void LedCube<DataPin, ClockPin, StoragePin>::clearCube() {
   DataOutput::Write(LOW);
 
-  for (byte i = 0; i < (LEDCUBE_NUMBER_OF_SHIFT_REGISTERS *
-                        LEDCUBE_SHIFT_REGISTER_BITWIDTH);
+  for (uint8_t i = 0; i < (LEDCUBE_NUMBER_OF_SHIFT_REGISTERS *
+                           LEDCUBE_SHIFT_REGISTER_BITWIDTH);
        i++) {
     ClockOutput::Write(HIGH);
     ClockOutput::Write(LOW);
@@ -255,8 +259,9 @@ void LedCube<DataPin, ClockPin, StoragePin>::clearCube() {
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxel(byte X, byte Y,
-                                                               byte Z) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxel(uint8_t X,
+                                                               uint8_t Y,
+                                                               uint8_t Z) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
@@ -276,8 +281,9 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxel(byte X, byte Y,
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::clearVoxel(byte X, byte Y,
-                                                                 byte Z) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::clearVoxel(uint8_t X,
+                                                                 uint8_t Y,
+                                                                 uint8_t Z) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
@@ -298,8 +304,10 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::clearVoxel(byte X, byte Y,
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::writeVoxel(
-    byte X, byte Y, byte Z, boolean Value) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::writeVoxel(uint8_t X,
+                                                                 uint8_t Y,
+                                                                 uint8_t Z,
+                                                                 bool Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
@@ -320,9 +328,10 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::writeVoxel(
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxel(byte X, byte Y,
-                                                               byte Z,
-                                                               boolean* Value) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxel(uint8_t X,
+                                                               uint8_t Y,
+                                                               uint8_t Z,
+                                                               bool* Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
@@ -342,8 +351,8 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxel(byte X, byte Y,
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsX(byte Y, byte Z,
-                                                                 byte* Value) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsX(
+    uint8_t Y, uint8_t Z, uint8_t* Value) {
   if (Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     *Value = CurrentFrame[Y][Z];
@@ -362,8 +371,8 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsX(byte Y, byte Z,
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsX(byte Y, byte Z,
-                                                                 byte Value) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsX(
+    uint8_t Y, uint8_t Z, uint8_t Value) {
   if (Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
     NextFrame[Y][Z] = Value;
@@ -382,11 +391,11 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsX(byte Y, byte Z,
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsY(byte X, byte Z,
-                                                                 byte* Value) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsY(
+    uint8_t X, uint8_t Z, uint8_t* Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
-    for (byte Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+    for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
       bitWrite(*Value, Y, bitRead(CurrentFrame[Y][Z], X));
     }
     return E_OK;
@@ -404,11 +413,11 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsY(byte X, byte Z,
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsY(byte X, byte Z,
-                                                                 byte Value) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsY(
+    uint8_t X, uint8_t Z, uint8_t Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
-    for (byte Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+    for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
       bitWrite(NextFrame[Y][Z], X, bitRead(Value, Y));
     }
     return E_OK;
@@ -426,11 +435,11 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsY(byte X, byte Z,
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZ(byte X, byte Y,
-                                                                 byte* Value) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZ(
+    uint8_t X, uint8_t Y, uint8_t* Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
-    for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+    for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
       bitWrite(*Value, Z, bitRead(CurrentFrame[Y][Z], X));
     }
     return E_OK;
@@ -448,11 +457,11 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZ(byte X, byte Y,
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZ(byte X, byte Y,
-                                                                 byte Value) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZ(
+    uint8_t X, uint8_t Y, uint8_t Value) {
   if (X < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE &&
       Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE) {
-    for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+    for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
       bitWrite(NextFrame[Y][Z], X, bitRead(Value, Z));
     }
     return E_OK;
@@ -471,7 +480,8 @@ stdReturnType LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZ(byte X, byte Y,
  * \param[out] Value Voxels with value on or off.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-byte LedCube<DataPin, ClockPin, StoragePin>::getVoxelsXFast(byte Y, byte Z) {
+uint8_t LedCube<DataPin, ClockPin, StoragePin>::getVoxelsXFast(uint8_t Y,
+                                                               uint8_t Z) {
   return CurrentFrame[Y][Z];
 }
 
@@ -485,8 +495,9 @@ byte LedCube<DataPin, ClockPin, StoragePin>::getVoxelsXFast(byte Y, byte Z) {
  * \param[in] Value Voxels with value on or off.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsXFast(byte Y, byte Z,
-                                                            byte Value) {
+void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsXFast(uint8_t Y,
+                                                            uint8_t Z,
+                                                            uint8_t Value) {
   NextFrame[Y][Z] = Value;
 }
 
@@ -500,10 +511,11 @@ void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsXFast(byte Y, byte Z,
  * \param[out] Value Voxels with value on or off.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-byte LedCube<DataPin, ClockPin, StoragePin>::getVoxelsYFast(byte X, byte Z) {
-  byte Value = 0;
+uint8_t LedCube<DataPin, ClockPin, StoragePin>::getVoxelsYFast(uint8_t X,
+                                                               uint8_t Z) {
+  uint8_t Value = 0;
 
-  for (byte Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+  for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
     bitWrite(Value, Y, bitRead(CurrentFrame[Y][Z], X));
   }
   return Value;
@@ -519,9 +531,10 @@ byte LedCube<DataPin, ClockPin, StoragePin>::getVoxelsYFast(byte X, byte Z) {
  * \param[in] Value Voxels with value on or off.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsYFast(byte X, byte Z,
-                                                            byte Value) {
-  for (byte Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsYFast(uint8_t X,
+                                                            uint8_t Z,
+                                                            uint8_t Value) {
+  for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
     bitWrite(NextFrame[Y][Z], X, bitRead(Value, Y));
   }
 }
@@ -535,10 +548,11 @@ void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsYFast(byte X, byte Z,
  * \param[in] Y Y-axis coordinate.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-byte LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZFast(byte X, byte Y) {
-  byte Value = 0;
+uint8_t LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZFast(uint8_t X,
+                                                               uint8_t Y) {
+  uint8_t Value = 0;
 
-  for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+  for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
     bitWrite(Value, Z, bitRead(CurrentFrame[Y][Z], X));
   }
   return Value;
@@ -554,9 +568,10 @@ byte LedCube<DataPin, ClockPin, StoragePin>::getVoxelsZFast(byte X, byte Y) {
  * \param[in] Value Voxels with value on or off.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZFast(byte X, byte Y,
-                                                            byte Value) {
-  for (byte Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
+void LedCube<DataPin, ClockPin, StoragePin>::setVoxelsZFast(uint8_t X,
+                                                            uint8_t Y,
+                                                            uint8_t Value) {
+  for (uint8_t Z = 0; Z < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Z++) {
     bitWrite(NextFrame[Y][Z], X, bitRead(Value, Z));
   }
 }
@@ -600,8 +615,8 @@ LedCube<DataPin, ClockPin, StoragePin>::setNextFrameTimeElapsed() {
  * \param[in] Data Data (Byte) to send.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-void LedCube<DataPin, ClockPin, StoragePin>::sendData(byte Data) {
-  for (byte i = 0; i < 8; i++) {
+void LedCube<DataPin, ClockPin, StoragePin>::sendData(uint8_t Data) {
+  for (uint8_t i = 0; i < 8; i++) {
     // LSB First
     // digitalWrite(DataInPin, !!(Data & (1 << i)));
     // MSB First
@@ -621,14 +636,14 @@ void LedCube<DataPin, ClockPin, StoragePin>::sendData(byte Data) {
  * \return E_OK or E_NOT_OK.
  */
 template <uint8_t DataPin, uint8_t ClockPin, uint8_t StoragePin>
-stdReturnType LedCube<DataPin, ClockPin, StoragePin>::showLayer(byte Layer) {
+stdReturnType LedCube<DataPin, ClockPin, StoragePin>::showLayer(uint8_t Layer) {
   stdReturnType ReturnValue = E_NOT_OK;
 
   if (Layer < LEDCUBE_NUMBER_OF_LAYERS) {
     /* put on given layer */
     sendData(1U << Layer);
     /* send the layer data to the shift registers */
-    for (byte Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
+    for (uint8_t Y = 0; Y < LEDCUBE_NUMBER_OF_LEDS_PER_SIDE; Y++) {
       sendData(CurrentFrame[Y][Layer]);
     }
     // toggle storage pin
